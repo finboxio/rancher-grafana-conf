@@ -1,0 +1,8 @@
+metadata-version = "2015-12-19"
+log-level = "debug"
+interval = 10
+onetime = false
+
+[[ template ]]
+source = "/etc/rancher-conf/get-templates.sh.tmpl"
+dest = "/etc/rancher-conf/get-templates.sh"

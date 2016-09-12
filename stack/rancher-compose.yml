@@ -1,0 +1,14 @@
+grafana:
+  scale: 1
+  metadata:
+    grafana:
+      dashboards:
+        static:
+          - https://raw.githubusercontent.com/infinityworksltd/graf-db/master/dashboards/Host_Stats.json
+grafana-conf:
+  scale: 1
+  metadata:
+    grafana:
+      dashboards:
+        static:
+          - https://raw.githubusercontent.com/infinityworksltd/graf-db/master/dashboards/Container_Stats.json
