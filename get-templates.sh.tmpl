@@ -1,0 +1,13 @@
+#! /bin/sh
+
+mkdir -p /etc/rancher-conf/dashboards
+cd /etc/rancher-conf/dashboards
+
+{{ with service }}
+{{ with .Metadata.GetValue "grafana" }}
+{{ range $url := .dashboards.static }}
+id=$(echo "{{ $url }}" | sha256sum - | awk '{ print $1 }')
+curl -L -o $id {{ $url }}
+
+{{ end }}
+{{ end }}

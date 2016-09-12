@@ -1,0 +1,34 @@
+grafana:
+  tty: true
+  image: grafana/grafana:3.0.1
+  volumes_from:
+    - grafana-conf
+  environment:
+    GF_DASHBOARDS_JSON_ENABLED: 'true'
+    GF_DASHBOARDS_JSON_PATH: /etc/rancher-conf/dashboards
+  labels:
+    lb.haproxy.3000.frontend: 80/http
+    lb.haproxy.3000.domains: http://gf.rancher
+    io.rancher.sidekicks: grafana-db,grafana-db-conf
+
+grafana-conf:
+  image: finboxio/rancher-grafana-conf:dev
+  tty: true
+  pid: host
+  privileged: true
+  labels:
+    io.rancher.container.pull_image: always
+  volumes:
+    - /ebs:/ebs
+    - /etc/rancher-conf
+    - /opt/rancher/bin
+
+grafana-serve:
+  image: finboxio/serve:dev
+  tty: true
+  command: /etc/rancher-conf
+  labels:
+    lb.haproxy.3000.frontend: 80/http
+    lb.haproxy.3000.domain: http://gs.rancher
+  volumes_from:
+    - grafana-conf
