@@ -1,6 +1,8 @@
 #! /bin/sh
 
+mkdir -p /etc/rancher-conf/dashboards
 mkdir -p /etc/rancher-conf/dashboards.staged
+
 cd /etc/rancher-conf/dashboards.staged
 
 {{ range services -}}
@@ -10,7 +12,7 @@ kind={{ .Kind }}
 {{ with .Metadata.GetValue "grafana" -}}
 {{ range $url := .dashboards.static -}}
 id=$(echo "{{ $url }}" | sha256sum - | awk '{ print $1 }')
-echo "Downloading {{ $url }} to $id"
+echo "Downloading {{ $url }} to $id.json"
 curl -s -L -o ${id}.json {{ $url }}
 
 {{ end -}}
@@ -18,4 +20,4 @@ curl -s -L -o ${id}.json {{ $url }}
 {{ end -}}
 
 cd ..
-mv dashboards.staged/* dashboards/*
+mv dashboards.staged/* dashboards/

@@ -10,12 +10,12 @@ GF_PASS={{ .Metadata.GetValue "admin_password" }}
 GF_HOST={{ $host }}
 GF_PORT={{ .Metadata.GetValue "port" }}
 
-while ! curl -sf http://$GF_USER:$GF_PASS@$GF_HOST:${GF_PORT:-3000}/api/datasources; do
+while ! curl http://$GF_USER:$GF_PASS@$GF_HOST:${GF_PORT:-3000}/api/datasources; do
   echo "Waiting for grafana api..."
   sleep 5
 done
 
-sources=$(curl -sf http://$GF_USER:$GF_PASS@$GF_HOST:${GF_PORT:-3000}/api/datasources)
+sources=$(curl http://$GF_USER:$GF_PASS@$GF_HOST:${GF_PORT:-3000}/api/datasources)
 
 {{ range services -}}
 {{ $grafana := .Metadata.GetValue "grafana" -}}
@@ -42,7 +42,7 @@ if [[ "$ds" != "" ]]; then
     .isDefault = {{ if $source.isDefault }}{{ $source.isDefault }}{{ else }}false{{ end }}
   ')
   dsid=$(echo "$ds" | jq .id)
-  echo "$ds" | curl -X PUT -sf -H 'Content-Type: application/json' -d @- http://$GF_USER:$GF_PASS@$GF_HOST:${GF_PORT:-3000}/api/datasources/$dsid
+  echo "$ds" | curl -X PUT -H 'Content-Type: application/json' -d @- http://$GF_USER:$GF_PASS@$GF_HOST:${GF_PORT:-3000}/api/datasources/$dsid
 else
   ds=$(echo "{}" | jq '
     .name = "{{ $name }}" |
@@ -59,7 +59,7 @@ else
     .withCredentials = {{ if $source.withCredentials }}{{ $source.withCredentials }}{{ else }}false{{ end }} |
     .isDefault = {{ if $source.isDefault }}{{ $source.isDefault }}{{ else }}false{{ end }}
   ')
-  echo "$ds" | curl -X POST -sf -H 'Content-Type: application/json' -d @- http://$GF_USER:$GF_PASS@$GF_HOST:${GF_PORT:-3000}/api/datasources
+  echo "$ds" | curl -X POST -H 'Content-Type: application/json' -d @- http://$GF_USER:$GF_PASS@$GF_HOST:${GF_PORT:-3000}/api/datasources
 fi
 
 {{ end -}}

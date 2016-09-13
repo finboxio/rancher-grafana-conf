@@ -25,7 +25,7 @@ grafana-conf:
     - /opt/rancher/bin
 
 grafana-serve:
-  image: finboxio/serve:dev
+  image: finboxio/serve
   tty: true
   command: /etc/rancher-conf
   labels:
