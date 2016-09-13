@@ -1,0 +1,70 @@
+#! /bin/sh
+
+# Add/Update datasources
+
+{{ with self.Parent -}}
+{{ $host := .Address -}}
+{{ with service -}}
+GF_USER={{ .Metadata.GetValue "admin_user" }}
+GF_PASS={{ .Metadata.GetValue "admin_password" }}
+GF_HOST={{ $host }}
+GF_PORT={{ .Metadata.GetValue "port" }}
+
+while ! curl -sf http://$GF_USER:$GF_PASS@$GF_HOST:${GF_PORT:-3000}/api/datasources; do
+  echo "Waiting for grafana api..."
+  sleep 5
+done
+
+sources=$(curl -sf http://$GF_USER:$GF_PASS@$GF_HOST:${GF_PORT:-3000}/api/datasources)
+
+{{ range services -}}
+{{ $grafana := .Metadata.GetValue "grafana" -}}
+{{ if $grafana -}}
+{{ if $grafana.datasources -}}
+{{ range $name, $source := $grafana.datasources -}}
+
+ds=$(echo "$sources" | jq '.[] | select(.name == "{{ $name }}")')
+
+if [[ "$ds" != "" ]]; then
+  ds=$(echo "$ds" | jq '
+    .name = "{{ $name }}" |
+    .type = "{{ if $source.type }}{{ $source.type }}{{ end }}" |
+    .orgId = {{ if $source.orgId }}{{ $source.orgId }}{{ else }}1{{ end }} |
+    .access = "{{ if $source.access }}{{ $source.access }}{{ else }}proxy{{ end }}" |
+    .url = "{{ if $source.url }}{{ $source.url }}{{ end }}" |
+    .user = "{{ if $source.user }}{{ $source.user }}{{ end }}" |
+    .password = "{{ if $source.password }}{{ $source.password }}{{ end }}" |
+    .database = "{{ if $source.database }}{{ $source.database }}{{ end }}" |
+    .basicAuth = {{ if $source.basicAuth }}{{ $source.basicAuth }}{{ else }}false{{ end }} |
+    .basicAuthUser = "{{ if $source.basicAuthUser }}{{ $source.basicAuthUser }}{{ end }}" |
+    .basicAuthPassword = "{{ if $source.basicAuthPassword }}{{ $source.basicAuthPassword }}{{ end }}" |
+    .withCredentials = {{ if $source.withCredentials }}{{ $source.withCredentials }}{{ else }}false{{ end }} |
+    .isDefault = {{ if $source.isDefault }}{{ $source.isDefault }}{{ else }}false{{ end }}
+  ')
+  dsid=$(echo "$ds" | jq .id)
+  echo "$ds" | curl -X PUT -sf -H 'Content-Type: application/json' -d @- http://$GF_USER:$GF_PASS@$GF_HOST:${GF_PORT:-3000}/api/datasources/$dsid
+else
+  ds=$(echo "{}" | jq '
+    .name = "{{ $name }}" |
+    .type = "{{ if $source.type }}{{ $source.type }}{{ end }}" |
+    .orgId = {{ if $source.orgId }}{{ $source.orgId }}{{ else }}1{{ end }} |
+    .access = "{{ if $source.access }}{{ $source.access }}{{ else }}proxy{{ end }}" |
+    .url = "{{ if $source.url }}{{ $source.url }}{{ end }}" |
+    .user = "{{ if $source.user }}{{ $source.user }}{{ end }}" |
+    .password = "{{ if $source.password }}{{ $source.password }}{{ end }}" |
+    .database = "{{ if $source.database }}{{ $source.database }}{{ end }}" |
+    .basicAuth = {{ if $source.basicAuth }}{{ $source.basicAuth }}{{ else }}false{{ end }} |
+    .basicAuthUser = "{{ if $source.basicAuthUser }}{{ $source.basicAuthUser }}{{ end }}" |
+    .basicAuthPassword = "{{ $source.basicAuthPassword }}" |
+    .withCredentials = {{ if $source.withCredentials }}{{ $source.withCredentials }}{{ else }}false{{ end }} |
+    .isDefault = {{ if $source.isDefault }}{{ $source.isDefault }}{{ else }}false{{ end }}
+  ')
+  echo "$ds" | curl -X POST -sf -H 'Content-Type: application/json' -d @- http://$GF_USER:$GF_PASS@$GF_HOST:${GF_PORT:-3000}/api/datasources
+fi
+
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ end -}}

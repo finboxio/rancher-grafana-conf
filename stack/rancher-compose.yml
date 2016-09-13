@@ -1,14 +1,28 @@
 grafana:
   scale: 1
+  health_check:
+    port: 3000
+    interval: 5000
+    unhealthy_threshold: 3
+    request_line: ''
+    healthy_threshold: 2
+    response_timeout: 5000
   metadata:
-    grafana:
-      dashboards:
-        static:
-          - https://raw.githubusercontent.com/infinityworksltd/graf-db/master/dashboards/Host_Stats.json
+    port: 3000
+    admin_user: finboxio
+    admin_password: adapmo
+    allow_sign_up: false
+    secret_key: adapmo
 grafana-conf:
   scale: 1
-  metadata:
-    grafana:
-      dashboards:
-        static:
-          - https://raw.githubusercontent.com/infinityworksltd/graf-db/master/dashboards/Container_Stats.json
+grafana-serve:
+  scale: 1
+  health_check:
+    port: 3000
+    interval: 2000
+    initializing_timeout: 10000
+    unhealthy_threshold: 3
+    strategy: recreate
+    healthy_threshold: 2
+    response_timeout: 2000
+    reinitializing_timeout: 10000
