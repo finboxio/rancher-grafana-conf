@@ -1,6 +1,7 @@
 grafana:
   tty: true
   image: grafana/grafana:3.0.1
+  entrypoint: /opt/rancher/bin/run.sh
   volumes_from:
     - grafana-conf
   environment:
@@ -9,7 +10,7 @@ grafana:
   labels:
     lb.haproxy.3000.frontend: 80/http
     lb.haproxy.3000.domains: http://gf.rancher
-    io.rancher.sidekicks: grafana-db,grafana-db-conf
+    io.rancher.sidekicks: grafana-conf,grafana-serve
 
 grafana-conf:
   image: finboxio/rancher-grafana-conf:dev
@@ -29,6 +30,6 @@ grafana-serve:
   command: /etc/rancher-conf
   labels:
     lb.haproxy.3000.frontend: 80/http
-    lb.haproxy.3000.domain: http://gs.rancher
+    lb.haproxy.3000.domains: http://gs.rancher
   volumes_from:
     - grafana-conf

@@ -4,5 +4,17 @@ interval = 10
 onetime = false
 
 [[ template ]]
+source = "/etc/rancher-conf/grafana.ini.tmpl"
+dest = "/etc/rancher-conf/grafana.ini"
+
+[[ template ]]
 source = "/etc/rancher-conf/get-templates.sh.tmpl"
 dest = "/etc/rancher-conf/get-templates.sh"
+notify-cmd = "sh /etc/rancher-conf/get-templates.sh"
+notify-output = true
+
+[[ template ]]
+source = "/etc/rancher-conf/add-datasources.sh.tmpl"
+dest = "/etc/rancher-conf/add-datasources.sh"
+notify-cmd = "sh /etc/rancher-conf/add-datasources.sh"
+notify-output = true
