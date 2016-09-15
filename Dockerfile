@@ -1,6 +1,4 @@
-FROM finboxio/rancher-conf-aws:dev
-
-RUN apk add --no-cache curl
+FROM finboxio/rancher-conf-aws
 
 ADD config.toml /etc/rancher-conf/
 ADD get-templates.sh.tmpl /etc/rancher-conf/
